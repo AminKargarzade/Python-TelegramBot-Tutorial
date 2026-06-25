@@ -19,4 +19,20 @@ def send_welcome(message):
     bot.send_message(message.chat.id,json.dumps(message.chat.__dict__, indent=4,ensure_ascii=False))
 
 
+
+
+def check_hello(message):
+    return message.text == 'hello'
+
+
+# Handles all messages for which the lambda returns True
+@bot.message_handler(func=check_hello)
+def handle_text_doc(message):
+	print('Triggered hello 1:)')
+
+@bot.message_handler(func=lambda message: True)
+def handle_text(message):
+	print('Triggered 2:)')
+
+
 bot.infinity_polling()
