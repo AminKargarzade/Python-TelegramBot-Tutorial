@@ -1,5 +1,8 @@
 import telebot
+from telebot import apihelper
 import os
+
+apihelper.ENABLE_MIDDLEWARE = True
 
 API_TOKEN = os.environ.get("API_TOKEN", "")
 
@@ -14,9 +17,15 @@ def send_welcome(message):
     )
 
 
-@bot.edited_message_handler(func=lambda message: True)
-def edited_message(message):
-    print("Triggered for edited message")
+@bot.middleware_handler(update_types=["message"])
+def modify_message(bot_instance, message):
+    # modifying the message before it reaches any other handler
+    message.another_text = message.text + ":changed :)"
+
+
+@bot.message_handler(func=lambda message: True)
+def reply_modified(message):
+    bot.reply_to(message, message.another_text)
 
 
 bot.infinity_polling()
