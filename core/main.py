@@ -1,6 +1,7 @@
 import telebot
 import os
 import logging
+from telebot.types import InlineKeyboardMarkup, InlineKeyboardButton
 
 logger = telebot.logger
 telebot.logger.setLevel(logging.INFO)
@@ -18,30 +19,25 @@ def send_welcome(message):
     )
 
 
-@bot.message_handler(commands=["test_voice"])
-def send_voice_file(message):
-    voice_file = open("./test/files/test.mp3", "rb")
-    bot.send_chat_action(message.chat.id, action="upload_voice")
-    bot.send_voice(message.chat.id, voice_file)
-
-
-@bot.message_handler(commands=["test_video"])
-def send_video_file(message):
-    bot.send_chat_action(message.chat.id, action="upload_video")
-    bot.send_video(message.chat.id, open("./test/files/test.mp4", "rb"))
-
-
-@bot.message_handler(commands=["test_document"])
+@bot.message_handler(commands=["upload_test"])
 def send_document_file(message):
-    bot.send_chat_action(message.chat.id, action="upload_document")
-    bot.send_document(message.chat.id, open("./test/files/test.pdf", "rb"))
+    markup = InlineKeyboardMarkup()
+    like_btn = InlineKeyboardButton("Like", callback_data="like")
+    dislike_btn = InlineKeyboardButton("Dislike", callback_data="dislike")
+    markup.add(like_btn, dislike_btn)
+    bot.send_video(
+        message.chat.id,
+        "BAACAgQAAxkBAAIBMmpFDnKCyt4hykEgA1aCTgfDsXZzAAKCHwACR3MpUgZnsUqOtLtpPAQ",
+        caption="This is a sample video file",
+        reply_markup=markup,
+    )
 
 
-@bot.message_handler(commands=["test_photo"])
-def send_photo_file(message):
-    bot.send_chat_action(message.chat.id, action="upload_photo")
-    bot.send_document(message.chat.id, open("./test/files/test.jpg", "rb"))
-    bot.send_photo(message.chat.id, open("./test/files/test.jpg", "rb"))
+@bot.message_handler(
+    content_types=["document", "video_note", "video", "audio", "voice", "photo"]
+)
+def check_id(message):
+    logger.info(message.__dict__)
 
 
 bot.infinity_polling()
