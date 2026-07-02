@@ -1,59 +1,60 @@
 import telebot
 import os
 import logging
-from telebot.types import InlineQueryResultArticle, InputTextMessageContent
 
 logger = telebot.logger
 telebot.logger.setLevel(logging.INFO)
 
-
 API_TOKEN = os.environ.get("API_TOKEN", "")
 bot = telebot.TeleBot(API_TOKEN)
 
+# MarkDown
+# *bold text*
+# _italic text_
+# `inline code`
+# [inline URL](https://github.com/AminKargarzade)
+# [mention](tg://user?id=USER_ID)
 
-@bot.message_handler(commands=["start"])
-def send_welcome(message):
+# HTML
+# <b>bold text</b>
+# <i>italic text</i>
+# <code>inline code</code>
+# <a href="https://github.com/AminKargarzade">inline URL</a>
+# <a href="tg://user?id=USER_ID">mention</a>
+
+
+@bot.message_handler(commands=["markdown"])
+def handle_messages(message):
+    bot.send_message(message.chat.id, "*bold text*", parse_mode="Markdown")
+    bot.send_message(message.chat.id, "_italic text_", parse_mode="Markdown")
+    bot.send_message(message.chat.id, "`import requests`", parse_mode="Markdown")
     bot.send_message(
-        message.chat.id, """Hi This is a sample for learning telegram bot in python."""
+        message.chat.id,
+        "[inline URL](https://github.com/AminKargarzade)",
+        parse_mode="Markdown",
+    )
+    bot.send_message(
+        message.chat.id,
+        f"[mention](tg://user?id={message.from_user.id})",
+        parse_mode="Markdown",
     )
 
 
-@bot.inline_handler(func=lambda query: len(query.query) >= 0)
-def query_handler(query):
-    logger.info(query)
-    results = []
-
-    results.append(
-        InlineQueryResultArticle(
-            id="1",
-            title="This is a test",
-            input_message_content=InputTextMessageContent(
-                message_text="This is a response"
-            ),
-            description="This is a description ",
-        )
+@bot.message_handler(commands=["html"])
+def handle_messages2(message):
+    bot.send_message(message.chat.id, "<b>bold text</b>", parse_mode="HTML")
+    bot.send_message(message.chat.id, "<i>italic text</i>", parse_mode="HTML")
+    bot.send_message(message.chat.id, "<code>inline code</code>", parse_mode="HTML")
+    bot.send_message(
+        message.chat.id,
+        '<a href="https://github.com/AminKargarzade">inline URL</a>',
+        parse_mode="HTML",
     )
-    results.append(
-        InlineQueryResultArticle(
-            id="2",
-            title="Join the bot",
-            input_message_content=InputTextMessageContent(message_text="JOIN the bot"),
-            url="https://t.me/py_rastin_bot",
-        )
+    bot.send_message(
+        message.chat.id,
+        f'<a href="tg://user?id={message.from_user.id}">mention</a>',
+        parse_mode="HTML",
     )
-
-    results.append(
-        InlineQueryResultArticle(
-            id="3",
-            title="Check out my Github",
-            input_message_content=InputTextMessageContent(
-                message_text="https://github.com/AminKargarzade"
-            ),
-            url="https://github.com/AminKargarzade",
-        )
-    )
-
-    bot.answer_inline_query(query.id, results, cache_time=0)
 
 
 bot.infinity_polling()
