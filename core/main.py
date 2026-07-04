@@ -1,7 +1,7 @@
 import telebot
 import os
 import logging
-from gtts import gTTS
+import requests
 
 logger = telebot.logger
 telebot.logger.setLevel(logging.INFO)
@@ -14,22 +14,31 @@ bot = telebot.TeleBot(API_TOKEN)
 @bot.message_handler(commands=["start"])
 def send_welcome(message):
     bot.send_message(
-        message.chat.id, "Send me a text and I will read it aloud for you in English!"
+        message.chat.id,
+        "لطفا کلید واژه مورد نظر خود را برای سرچ در دیوار را وارد کنید!",
     )
+
+
+def fetch_divar_ads(text_query):
+    url = "https://api.divar.ir/v8/web-search/urmia"
+    params = {"q": text_query}
+    response = requests.get(url=url, params=params)
+    return response.json()
 
 
 @bot.message_handler(func=lambda message: True)
-def text_to_speech(message):
+def fetch_ads(message):
     text = message.text
-    file_name = "voices/output.mp3"
-    output = gTTS(text=text, lang="en", tld="com.au")
-    output.save(file_name)
-    bot.send_voice(
-        chat_id=message.chat.id,
-        reply_to_message_id=message.id,
-        voice=open(file_name, "rb"),
-    )
-    os.remove(file_name)
+    data = fetch_divar_ads(text)
+    for item in data["web_widgets"]["post_list"][1:11]:
+        title = item["data"]["title"]
+        top_description_text = item["data"]["top_description_text"]
+        middle_description_text = item["data"]["middle_description_text"]
+        bottom_description_text = item["data"]["bottom_description_text"]
+        photo = item["data"]["image_url"][0]["src"]
+        token = item["data"]["token"]
+        description = f"{title}\n{top_description_text}\n{middle_description_text}\n{bottom_description_text}\nhttps://divar.ir/v/{token}"
+        bot.send_photo(chat_id=message.chat.id, caption=description, photo=photo)
 
 
 bot.infinity_polling()
