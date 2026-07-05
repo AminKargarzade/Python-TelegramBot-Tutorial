@@ -10,14 +10,17 @@ API_TOKEN = os.environ.get("API_TOKEN", "")
 bot = telebot.TeleBot(API_TOKEN)
 
 
-@bot.message_handler(func=lambda message: message.chat.type in ["group", "supergroup"])
-def handle_group_message(message):
-    logger.info("Group Triggered!")
+@bot.chat_join_request_handler()
+def join_request_handler(request):
+    logger.info(request)
+    bot.approve_chat_join_request(request.chat.id, request.from_user.id)
 
 
-@bot.message_handler(func=lambda message: message.chat.type in ["private"])
-def handle_private_message(message):
-    logger.info("Private Triggered!")
+@bot.message_handler(content_types=["new_chat_members"])
+def handle_new_join(message):
+    bot.send_message(
+        message.chat.id, f"Welcome to the Group, {message.from_user.username}!"
+    )
 
 
 bot.infinity_polling()
