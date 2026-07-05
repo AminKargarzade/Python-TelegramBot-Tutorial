@@ -10,17 +10,17 @@ API_TOKEN = os.environ.get("API_TOKEN", "")
 bot = telebot.TeleBot(API_TOKEN)
 
 
-@bot.chat_join_request_handler()
-def join_request_handler(request):
-    logger.info(request)
-    bot.approve_chat_join_request(request.chat.id, request.from_user.id)
-
-
-@bot.message_handler(content_types=["new_chat_members"])
-def handle_new_join(message):
+@bot.message_handler(commands=["pin"])
+def pin_message_handler(message):
     bot.send_message(
-        message.chat.id, f"Welcome to the Group, {message.from_user.username}!"
+        message.chat.id,
+        "Give me the message you want to pin, and I will pin it for you!",
     )
+    bot.register_next_step_handler(message, message_pinner)
+
+
+def message_pinner(message):
+    bot.pin_chat_message(message.chat.id, message.message_id)
 
 
 bot.infinity_polling()
