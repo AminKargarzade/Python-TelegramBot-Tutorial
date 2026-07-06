@@ -5,22 +5,39 @@ import logging
 logger = telebot.logger
 telebot.logger.setLevel(logging.INFO)
 
-
 API_TOKEN = os.environ.get("API_TOKEN", "")
 bot = telebot.TeleBot(API_TOKEN)
 
+# get_chat_administrators
+# get_chat_member
+# get_chat_members_count
+# get_chat
 
-@bot.message_handler(commands=["pin"])
-def pin_message_handler(message):
-    bot.send_message(
-        message.chat.id,
-        "Give me the message you want to pin, and I will pin it for you!",
-    )
-    bot.register_next_step_handler(message, message_pinner)
+# @bot.message_handler(func=lambda message: True)
+# def handle_messages(message):
+#     data = bot.get_chat(message.chat.id)
+#     logger.info(data)
+
+# @bot.message_handler(func=lambda message: True)
+# def handle_messages(message):
+#     data = bot.get_chat_member_count(message.chat.id)
+#     logger.info(data)
+
+# @bot.message_handler(func=lambda message: True)
+# def handle_messages(message):
+#     data = bot.get_chat_member(message.chat.id, message.from_user.id)
+#     logger.info(data)
+
+# @bot.message_handler(func=lambda message: True)
+# def handle_messages(message):
+#     data = bot.get_chat_administrators(message.chat.id)
+#     for user in data:
+#         logger.info(user)
 
 
-def message_pinner(message):
-    bot.pin_chat_message(message.chat.id, message.message_id)
+@bot.message_handler(commands=["ban"])
+def handle_messages(message):
+    logger.info(message.text.split(" ")[1])
 
 
 bot.infinity_polling()
